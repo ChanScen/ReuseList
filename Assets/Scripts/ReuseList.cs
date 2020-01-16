@@ -23,10 +23,11 @@ public class ReuseList : MonoBehaviour
     private Queue<GameObject> _unUsedQueue = new Queue<GameObject>();
     private Dictionary<string, GameObject> _usedMap = new Dictionary<string, GameObject>();
     private List<GameObject> _titleList = new List<GameObject>();
+    private List<GameObject> _itemList = new List<GameObject>();
     private int[] CountArray;
     private bool changed = false;
 
-    public delegate void VoidDelegate(int layoutIndex, int dataIndex, GameObject obj);
+    public delegate void VoidDelegate(int layoutIndex, int dataIndex, int realIndex, GameObject obj);
     public VoidDelegate onUpdateItem;
     public VoidDelegate onUpdateTitle;
 
@@ -50,6 +51,7 @@ public class ReuseList : MonoBehaviour
                 {
                     title = (GameObject)GameObject.Instantiate(titleTemp);
                     title.transform.SetParent(content.transform);
+                    title.transform.localScale = new Vector3(1f,1f,1f);
                     _titleList.Add(title);
                 }
                 else
@@ -61,7 +63,8 @@ public class ReuseList : MonoBehaviour
                 H += title.GetComponent<RectTransform>().sizeDelta.y;
 
                 if(onUpdateTitle != null){
-                    onUpdateTitle(i,0,title);
+                    //int realIndex = _titleList.IndexOf(title);
+                    onUpdateTitle(i,0,0,title);
                 }
             }
 
@@ -75,7 +78,7 @@ public class ReuseList : MonoBehaviour
             _layoutMap.Add(i, layout);
         }
 
-        content.GetComponent<RectTransform>().sizeDelta = new Vector2(viewW, H);
+        content.GetComponent<RectTransform>().sizeDelta = new Vector2(viewW, H+20);
 
         checkLayout();
     }
@@ -161,6 +164,8 @@ public class ReuseList : MonoBehaviour
             {
                 item = (GameObject)GameObject.Instantiate(itemTemp);
                 item.transform.SetParent(content.transform);
+                item.transform.localScale = new Vector3(1f,1f,1f);
+                _itemList.Add(item);
             }
             else
             {
@@ -170,7 +175,8 @@ public class ReuseList : MonoBehaviour
             item.SetActive(true);
             _usedMap.Add(key, item);
             if(onUpdateItem != null){
-                onUpdateItem(index,i,item);
+                int realIndex = _itemList.IndexOf(item);
+                onUpdateItem(index,i,realIndex,item);
             }
         }
     }
@@ -187,6 +193,7 @@ public class ReuseList : MonoBehaviour
         foreach (var v in _usedMap)
         {
             GameObject item = v.Value;
+            item.SetActive(false);
             _unUsedQueue.Enqueue(item);
         }
         _usedMap.Clear();
