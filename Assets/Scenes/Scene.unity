@@ -615,7 +615,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 20, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &1371166128
@@ -657,7 +657,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1544052441}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.9999997
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -730,7 +730,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
@@ -832,11 +832,14 @@ MonoBehaviour:
   titleTemp: {fileID: 1192010113567664, guid: 48466f74598f9dd4eb64662a4652146d, type: 2}
   itemTemp: {fileID: 1003522583726666, guid: 50f6b7b41ad29984b87c249189ed7c95, type: 2}
   content: {fileID: 1794533357}
-  lineCount: 12
-  CellWidth: 50
-  CellHeight: 50
-  viewH: 380
-  viewW: 380
+  lineCount: 3
+  padding:
+    m_Left: 10
+    m_Right: 0
+    m_Top: 10
+    m_Bottom: 10
+  spacing: {x: 10, y: 20}
+  testModel: 1
 --- !u!114 &1455736541
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -893,7 +896,7 @@ MonoBehaviour:
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 1371166128}
   m_HorizontalScrollbarVisibility: 2
-  m_VerticalScrollbarVisibility: 2
+  m_VerticalScrollbarVisibility: 1
   m_HorizontalScrollbarSpacing: -3
   m_VerticalScrollbarSpacing: -3
   m_OnValueChanged:
@@ -1010,6 +1013,6 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.0000230972}
+  m_AnchoredPosition: {x: 0, y: -0.000009514893}
   m_SizeDelta: {x: 668, y: 379.3}
   m_Pivot: {x: 0, y: 1}

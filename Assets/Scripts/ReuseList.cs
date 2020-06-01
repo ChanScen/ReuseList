@@ -13,12 +13,13 @@ public class ReuseList : MonoBehaviour
     public GameObject titleTemp;    //title
     public GameObject itemTemp;    //复用item
     public GameObject content;
-
-    public int lineCount = 7;
-    public float CellWidth = 258f;
-    public float CellHeight = 352f;
-    public float viewH = 380f;
-    public float viewW = 380f;
+    public int lineCount = 7;       //每行显示最大个数
+    public RectOffset padding;
+    public Vector2 spacing;
+    public bool testModel = false;
+    private Rect viewSize;
+    private Rect cellSize;
+    private Rect titleSize;
     private Dictionary<int, LayoutParam> _layoutMap = new Dictionary<int, LayoutParam>();
     private Queue<GameObject> _unUsedQueue = new Queue<GameObject>();
     private Dictionary<string, GameObject> _usedMap = new Dictionary<string, GameObject>();
@@ -34,16 +35,32 @@ public class ReuseList : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        ResetData(new int[] { 2, 6, 8, 9, 20, 29, 40 }, true);
+        viewSize = gameObject.GetComponent<RectTransform>().rect;
+        cellSize = itemTemp.GetComponent<RectTransform>().rect;
+        if (titleTemp != null)
+        {
+            titleSize = titleTemp.GetComponent<RectTransform>().rect;
+        }
+
+        RectTransform rt = content.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector3(0, 1);
+        rt.anchorMax = new Vector3(0, 1);
+        rt.pivot = new Vector3(0, 1);
+
+        //测试代码
+        if (testModel)
+        {
+            initList(new int[] { 4, 5, 6, 10, 20, 50, 100, 400 }, true);
+        }
     }
 
-    void initList(int[] array, bool isCrrateTitle = false)
+    void initList(int[] array, bool isCreateTitle = false)
     {
-        float H = 0;
+        float H = padding.top;
         CountArray = array;
         for (int i = 0; i < CountArray.Length; i++)
         {
-            if (isCrrateTitle)
+            if (isCreateTitle)
             {
                 //创建title
                 GameObject title;
@@ -51,7 +68,13 @@ public class ReuseList : MonoBehaviour
                 {
                     title = (GameObject)GameObject.Instantiate(titleTemp);
                     title.transform.SetParent(content.transform);
-                    title.transform.localScale = new Vector3(1f,1f,1f);
+                    title.transform.localScale = new Vector3(1f, 1f, 1f);
+
+                    RectTransform rt = title.GetComponent<RectTransform>();
+                    rt.anchorMin = new Vector3(0, 1);
+                    rt.anchorMax = new Vector3(0, 1);
+                    rt.pivot = new Vector3(0, 1);
+
                     _titleList.Add(title);
                 }
                 else
@@ -60,11 +83,12 @@ public class ReuseList : MonoBehaviour
                 }
                 title.transform.localPosition = new Vector2(0, -H);
                 title.SetActive(true);
-                H += title.GetComponent<RectTransform>().sizeDelta.y;
+                H += titleSize.height + spacing.y;
 
-                if(onUpdateTitle != null){
+                if (onUpdateTitle != null)
+                {
                     //int realIndex = _titleList.IndexOf(title);
-                    onUpdateTitle(i,0,0,title);
+                    onUpdateTitle(i, 0, 0, title);
                 }
             }
 
@@ -72,13 +96,13 @@ public class ReuseList : MonoBehaviour
             int line = Mathf.CeilToInt(CountArray[i] * 1f / lineCount);
             LayoutParam layout = new LayoutParam();
             layout.posY = -H;
-            layout.height = line * CellHeight;
-            H += line * CellHeight;
+            layout.height = line * cellSize.height + (line - 1) * spacing.y;
+            H += layout.height + spacing.y;
 
             _layoutMap.Add(i, layout);
         }
 
-        content.GetComponent<RectTransform>().sizeDelta = new Vector2(viewW, H+20);
+        content.GetComponent<RectTransform>().sizeDelta = new Vector2(viewSize.width, H + padding.bottom);
 
         checkLayout();
     }
@@ -93,7 +117,7 @@ public class ReuseList : MonoBehaviour
         {
             GameObject item = v.Value;
             float posY = item.transform.localPosition.y + pos.y;
-            if (posY > CellHeight || posY < -viewH)
+            if (posY > cellSize.height || posY < -viewSize.height)
             {
                 item.SetActive(false);
                 _unUsedQueue.Enqueue(item);
@@ -119,33 +143,33 @@ public class ReuseList : MonoBehaviour
             float start = 0f;
             float end = 0f;
 
-            if (posY1 > 0 && posY2 <= 0 && posY2 >= -viewH)             //顶部超出
+            if (posY1 > 0 && posY2 <= 0 && posY2 >= -viewSize.height)             //顶部超出
             {
                 start = posY1;
                 end = h;
             }
-            else if (posY1 <= 0 && posY1 > -viewH && posY2 < -viewH)    //底部超出
+            else if (posY1 <= 0 && posY1 > -viewSize.height && posY2 < -viewSize.height)    //底部超出
             {
                 start = 0;
-                end = viewH + posY1;
+                end = viewSize.height + posY1;
             }
-            else if (posY1 <= 0 && posY1 > -viewH && posY2 < 0 && posY2 >= -viewH)  //完全包含
+            else if (posY1 <= 0 && posY1 > -viewSize.height && posY2 < 0 && posY2 >= -viewSize.height)  //完全包含
             {
                 start = 0;
                 end = h;
             }
-            else if (posY1 > 0 && posY2 < -viewH)
+            else if (posY1 > 0 && posY2 < -viewSize.height)
             {
                 start = posY1;
-                end = posY1 + viewH;
+                end = posY1 + viewSize.height;
             }
             else
             {
                 continue;
             }
 
-            int _start = Mathf.FloorToInt(start / CellHeight);
-            int _end = Mathf.FloorToInt(end / CellHeight);
+            int _start = Mathf.FloorToInt(start / (cellSize.height + spacing.y));
+            int _end = Mathf.FloorToInt(end / (cellSize.height + spacing.y));
             updateLayout(_start, _end, v.Key);
         }
     }
@@ -164,19 +188,26 @@ public class ReuseList : MonoBehaviour
             {
                 item = (GameObject)GameObject.Instantiate(itemTemp);
                 item.transform.SetParent(content.transform);
-                item.transform.localScale = new Vector3(1f,1f,1f);
+                item.transform.localScale = new Vector3(1f, 1f, 1f);
+
+                RectTransform rt = item.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector3(0, 1);
+                rt.anchorMax = new Vector3(0, 1);
+                rt.pivot = new Vector3(0, 1);
+
                 _itemList.Add(item);
             }
             else
             {
                 item = _unUsedQueue.Dequeue();
             }
-            item.transform.localPosition = new Vector2(i % lineCount * CellWidth, posY - Mathf.FloorToInt(i * 1f / lineCount) * CellHeight);
+            item.transform.localPosition = new Vector2(padding.left + i % lineCount * (cellSize.width + spacing.x), posY - Mathf.FloorToInt(i * 1f / lineCount) * (cellSize.height + spacing.y));
             item.SetActive(true);
             _usedMap.Add(key, item);
-            if(onUpdateItem != null){
+            if (onUpdateItem != null)
+            {
                 int realIndex = _itemList.IndexOf(item);
-                onUpdateItem(index,i,realIndex,item);
+                onUpdateItem(index, i, realIndex, item);
             }
         }
     }
@@ -204,15 +235,11 @@ public class ReuseList : MonoBehaviour
         }
 
         _layoutMap.Clear();
-        content.transform.localPosition = new Vector2(0,0);
+        content.transform.localPosition = new Vector2(0, 0);
     }
-    public void ResetData(int[] array, bool isCrrateTitle)
+    public void ResetData(int[] array, bool isCreateTitle)
     {
         recyleAll();
-        initList(array, isCrrateTitle);
-    }
-
-    public void btnClick(){
-        ResetData(new int[] {  9, 20 }, false);
+        initList(array, isCreateTitle);
     }
 }
