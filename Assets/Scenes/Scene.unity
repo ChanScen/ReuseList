@@ -834,7 +834,7 @@ MonoBehaviour:
   content: {fileID: 1794533357}
   lineCount: 3
   padding:
-    m_Left: 10
+    m_Left: 30
     m_Right: 0
     m_Top: 10
     m_Bottom: 10
